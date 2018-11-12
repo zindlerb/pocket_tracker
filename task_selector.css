@@ -1,0 +1,28 @@
+body {
+	overflow: hidden;
+  margin: 0px;
+}
+
+.task-selector-input {
+  width: 100%;
+	height: 100%;
+	font-size: 20px;
+}
+
+.task-selector-container {
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	border: 2px solid black;
+}
+
+.task-selector-dropdown {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%,-50%);
+	background-color: white;
+	width: 600px;
+	height: 50px;
+	border: 1px gray solid;
+}
