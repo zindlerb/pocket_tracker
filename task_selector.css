@@ -26,3 +26,14 @@ body {
 	height: 50px;
 	border: 1px gray solid;
 }
+
+.selection-dropdown {
+	background-color: white;
+	margin: 2px 0px;
+	list-style: none;
+	padding: 0px;
+}
+
+.selection-dropdown-item {
+  padding: 8px 0px;
+}

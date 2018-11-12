@@ -1,8 +1,32 @@
 import _ from 'lodash'
 import './task_selector.css'
 import { h, render, Component } from 'preact';
-import { remote } from 'electron'
+import { remote, ipcRenderer } from 'electron'
 import Mousetrap from 'mousetrap';
+import {StoreAbstractBase} from './shared.js'
+
+class Store extends StoreAbstractBase {
+	constructor() {
+		super({
+			taskSearch: '',
+    	taskNames: new Set([])
+		})
+	}
+
+	addTask(taskName) {
+		console.log('addTask', taskName)
+		this.state.taskNames.add(taskName)
+		ipcRenderer.send('add-task', taskName)
+		this.triggerRender()
+	}
+
+	updateTaskSearch(newSearchString) {
+		this.state.taskSearch = newSearchString
+		this.triggerRender()
+	}
+}
+
+const localStore = new Store()
 
 const closeWindow = () => {
 	remote.getCurrentWindow().hide()
@@ -73,6 +97,21 @@ class DebouncedInput extends Component {
 	}
 }
 
+class SelectionDropdown extends Component {
+	render (props) {
+		console.log('SelectionDropdown PROPS', props)
+		const taskItems = Array.from(props.tasks).map((taskName) => {
+    	return <li className="selection-dropdown-item">{taskName}</li>
+		})
+
+		return (
+			<ul className="selection-dropdown">
+				{taskItems}
+			</ul>
+		)
+	}
+}
+
 
 class TaskSelector extends Component {
 	constructor() {
@@ -83,27 +122,31 @@ class TaskSelector extends Component {
 	}
 
 	componentDidMount() {
+		localStore.registerComponentContext(this)
+
 		window.addEventListener('keyup', (e) => {
 			if (e.keyCode === 13) { // Enter Pressed
-				console.log('wowo', 'wowoww')
-				console.log('creating current task', this.state.currentTask)
+				// TODO: handle moving the dropdown selection
+				localStore.addTask(this.state.taskSearch)
 			}
 		})
 	}
 
 	render(props, state) {
+		console.log('state', state)
+
 		return (
 			<div onClick={closeWindow} className="task-selector-container">
 				<div className="task-selector-dropdown">
 					<DebouncedInput
-						value={state.currentTask}
+						value={state.taskSearch}
 						className="task-selector-input"
 						autofocus={true}
 						onChange={(value) => {
-							console.log('set current task', value)
-							this.setState({ currentTask: value })
+							localStore.updateTaskSearch(value)
 						}}
 					/>
+					<SelectionDropdown tasks={state.taskNames || []} />
 				</div>
 			</div>
 		)
