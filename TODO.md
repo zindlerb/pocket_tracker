@@ -8,17 +8,20 @@
 [x] keyboard shortcut to open app dropdown
     - hello world in center of screen with keybinding
 [ ] enter to add a task and start its timer
-    [ ] local keypress for enter
-    [ ] inter process communication
+    [x] local keypress for enter
+    [x] inter process communication
+    [x] display start stop and pause buttons
+    [x] display a timer
+    [ ] have the timer respond to selecting a task
+        [ ] show currently running task
+    [ ] show different icon for different states
 [ ] show running task in open toolbar
 [ ] dropdown of existing tasks fuzzy search select them
+[ ] shortcut to play and pause tasks
+[ ] way to persist tasks on device
+    [ ] how to do this?
 [ ] show list of tasks in toolbar with amount of time spent on them
-[ ] clean up code and deploy finished version
-
-[ ] search tasks in toolbar and play pause them
-[ ] view prev tasks
-[ ] set up shortcut to switch tasks (have an overlay view)
-
+[ ] clean up code and deploy finished version 0.1
 
 
 
