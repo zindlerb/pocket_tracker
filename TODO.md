@@ -7,6 +7,7 @@
     not ideal should fix later
 [x] keyboard shortcut to open app dropdown
     - hello world in center of screen with keybinding
+[ ] fix pause unpause bug
 [ ] enter to add a task and start its timer
     [x] local keypress for enter
     [x] inter process communication
@@ -16,6 +17,7 @@
         [ ] show currently running task
     [ ] show different icon for different states
 [ ] show running task in open toolbar
+[ ] clean up code for the running of the timer
 [ ] dropdown of existing tasks fuzzy search select them
 [ ] shortcut to play and pause tasks
 [ ] way to persist tasks on device

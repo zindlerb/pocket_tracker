@@ -3,6 +3,7 @@ import { h, render, Component } from 'preact';
 import {StoreAbstractBase, PLAYING, PAUSED, STOPPED, MINIMIZED} from './shared.js'
 import { ipcRenderer } from 'electron'
 import './toolbar.css'
+import cx from 'classnames'
 
 class Store extends StoreAbstractBase {
 	constructor() {
@@ -22,6 +23,8 @@ class Store extends StoreAbstractBase {
 	}
 
 	stopTimer() {
+		if (!this.state.currentTask) return;
+
 		Object.assign(this.state, {
 			timerState: STOPPED,
 			startTimestamp: null,
@@ -111,7 +114,7 @@ class Timer extends Component {
 		const milliseconds = _.floor((_.floor(currentTime, 2) - _.floor(currentTime)) * 100)
 
 		return (
-			<div>
+			<div className={props.className}>
 				{_.floor(currentTime/60)}:{formattedSeconds}.{milliseconds}
 			</div>
 		)
@@ -129,13 +132,36 @@ class Toolbar extends Component {
 	}
 
   render(props, state) {
+		let playOrPaused = (
+			<button
+				className={cx("ma2", { disabled: !state.currentTask })}
+				onClick={() => {
+					if (state.currentTask) {
+          	store.startTimer()
+					}
+				}}>
+				Play
+			</button>
+		)
+		if (state.timerState === PLAYING) {
+			playOrPaused = <button className="ma2" onClick={() => store.pauseTimer()}>Pause</button>
+		}
+
   	return (
-			<div>
-				<div className=>{state.currentTask}</div>
-				<Timer timerState={state.timerState} startTimestamp={state.startTimestamp}/>
-				<button onClick={() => store.startTimer()}>Play</button>
-				<button onClick={() => store.pauseTimer()}>Pause</button>
-				<button onClick={() => store.stopTimer()}>Stop</button>
+			<div className="pa2 tc">
+				<div
+					className={cx('current-task mv2', state.currentTask ? 'selected' : 'blank')}>
+					{state.currentTask || 'select task'}
+				</div>
+				<Timer
+					className="timer mb2"
+					timerState={state.timerState}
+					startTimestamp={state.startTimestamp}
+				/>
+				<div>
+					{playOrPaused}
+					<button className="ma2" onClick={() => store.stopTimer()}>Stop</button>
+				</div>
 			</div>
 		)
 	}
