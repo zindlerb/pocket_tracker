@@ -9,7 +9,13 @@ export class StoreAbstractBase {
 		this.triggerRender()
 	}
 
+	setState(newState) {
+		Object.assign(this.state, newState)
+		this.triggerRender()
+	}
+
 	triggerRender() {
+		if (!this.componentContext) return;
 		this.componentContext.setState(this.state)
 	}
 }

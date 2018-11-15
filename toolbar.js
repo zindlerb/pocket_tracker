@@ -6,116 +6,134 @@ import './toolbar.css'
 import cx from 'classnames'
 
 class Store extends StoreAbstractBase {
-	constructor() {
+	constructor(timerStore) {
 		super({
 			timerState: STOPPED,
-			startTimestamp: null,
 			currentTask: null,
-			tasks: {}
-		})
-	}
-
-	startTimer() {
-		this.state.timerState = PLAYING
-		this.state.startTimestamp = this.state.startTimestamp || (Date.now() / 1000)
-
-		this.triggerRender()
-	}
-
-	stopTimer() {
-		if (!this.state.currentTask) return;
-
-		Object.assign(this.state, {
-			timerState: STOPPED,
-			startTimestamp: null,
-			currentTask: null
+			tasks: {},
 		})
 
-		this.state.tasks[this.state.currentTask].sessions.push({
-			startTimestamp: this.state.startTimestamp, // TODO: THIS WON't be right with pauses
-			endTimestamp: Date.now(),
-		})
-
-		this.triggerRender()
+		this.timerStore = timerStore
 	}
 
-	pauseTimer() {
-		this.state.timerState = PAUSED
-		this.triggerRender()
+	pauseTask() {
+		this.setState({ timerState: PAUSED })
+		this.timerStore.pause()
 	}
 
-	minimizeTimer() {
-		this.state.timerState = MINIMIZED
-		this.triggerRender()
+	minimizeWindow() {
+		// bad name
+		this.setState({ timerState: MINIMIZED })
+		this.timerStore.minimize()
+	}
+
+	stopTask() {
+		// TODO: add to sessions here
+		this.setState({ timerState: STOPPED })
+		this.timerStore.stop()
+	}
+
+	resumeTask() {
+		this.timerStore.start(this.state.timerState)
+		this.setState({ timerState: PLAYING })
 	}
 
 	startTask(taskName) {
-		this.currentTask = taskName
+		this.state.currentTask = taskName
+		this.state.timerState = PLAYING
 		if (!this.state.tasks[taskName]) {
 			this.state.tasks[taskName] = {
       	sessions: []
 			}
 		}
+
+		this.timerStore.start(this.state.timerState)
+		this.triggerRender()
 	}
 }
 
-const store = new Store()
+class TimerStore extends StoreAbstractBase {
+  constructor() {
+		super({})
+		this.framesPerSecond = 30
+		this.stop()
+	}
+
+	start(currentTimerState) {
+		const {lastMinimizedAt} = this.state
+
+		this.setState({
+			timerState: PLAYING,
+      startTimestamp: this.state.startTimestamp || Date.now(),
+			durationMillis: currentTimerState === MINIMIZED ? (Date.now() - lastMinimizedAt) : 0,
+			runningTimerId: setInterval(() => {
+				this.state.durationMillis += (1000 / this.framesPerSecond)
+				this.triggerRender()
+			}, 1000/this.framesPerSecond)
+		})
+	}
+
+	stop(currentTimerState) {
+		clearInterval(this.state.runningTimerId)
+		this.setState({
+			startTimestamp: null,
+			lastMinimizedAt: null,
+			durationMillis: 0,
+			runningTimerId: null
+		})
+	}
+
+	pause() {
+		clearInterval(this.state.runningTimerId)
+		this.setState({
+			runningTimerId: null
+		})
+	}
+
+	minimize() {
+		clearInterval(this.state.runningTimerId)
+		this.setState({
+			lastMinimizedAt: Date.now(),
+			runningTimerId: null
+		})
+	}
+}
+
+const timerStore = new TimerStore()
+const store = new Store(timerStore)
+
 
 ipcRenderer.on('toolbarHide', () => {
-	store.minimizeTimer()
+	if (store.state.timerState === PLAYING) {
+		store.minimizeWindow()
+	}
 })
 
 ipcRenderer.on('toolbarShow', () => {
 	if (store.state.timerState === MINIMIZED) {
-		store.startTimer()
+		store.resumeTask()
 	}
 })
 
-ipcRenderer.on('add-task', (taskName) => {
+ipcRenderer.on('add-task', (e, taskName) => {
 	store.startTask(taskName)
 })
 
 class Timer extends Component {
-  constructor() {
-		super()
-  	this.state = {
-			currentTime: 0
-		}
+	componentDidMount() {
+  	timerStore.registerComponentContext(this)
 	}
 
-	componentWillReceiveProps({timerState, startTimestamp}) {
-		const oldTimerState = this.props.timerState
-
-		if (timerState !== oldTimerState) {
-			if (timerState === PLAYING) {
-				const framesPerSecond = 30
-
-				if (oldTimerState === MINIMIZED) {
-        	this.setState({
-						currentTime: (Date.now() / 1000) - startTimestamp
-					})
-				}
-
-				this._timerId = setInterval(() => {
-					this.setState({ currentTime: _.floor(this.state.currentTime + 1/framesPerSecond, 2) })
-				}, 1000/framesPerSecond)
-			} else if (timerState === PAUSED || timerState === MINIMIZED) {
-				clearInterval(this._timerId)
-			} else if (timerState === STOPPED) {
-				clearInterval(this._timerId)
-				this.setState({ currentTime: 0 })
-			}
-		}
-	}
-
-	render(props, { currentTime }) {
-		const seconds = _.floor(currentTime) % 60
+	render(props, { durationMillis }) {
+		const durationSeconds = durationMillis / 1000
+		const seconds = _.floor(durationSeconds) % 60
 		const formattedSeconds = seconds < 10 ? `0${seconds}` : seconds
-		const milliseconds = _.floor((_.floor(currentTime, 2) - _.floor(currentTime)) * 100)
+		const milliseconds = _.floor((_.floor(durationSeconds, 2) - _.floor(durationSeconds)) * 100)
+		const formattedMillis = milliseconds < 10 ? `0${milliseconds}` : milliseconds
 
 		return (
 			<div className={props.className}>
-				{_.floor(currentTime/60)}:{formattedSeconds}.{milliseconds}
+				{_.floor(durationSeconds/60)}:{formattedSeconds}.{formattedMillis}
 			</div>
 		)
 	}
@@ -137,14 +155,14 @@ class Toolbar extends Component {
 				className={cx("ma2", { disabled: !state.currentTask })}
 				onClick={() => {
 					if (state.currentTask) {
-          	store.startTimer()
+          	store.startTask(state.currentTask)
 					}
 				}}>
 				Play
 			</button>
 		)
 		if (state.timerState === PLAYING) {
-			playOrPaused = <button className="ma2" onClick={() => store.pauseTimer()}>Pause</button>
+			playOrPaused = <button className="ma2" onClick={() => store.pauseTask()}>Pause</button>
 		}
 
   	return (
@@ -153,14 +171,10 @@ class Toolbar extends Component {
 					className={cx('current-task mv2', state.currentTask ? 'selected' : 'blank')}>
 					{state.currentTask || 'select task'}
 				</div>
-				<Timer
-					className="timer mb2"
-					timerState={state.timerState}
-					startTimestamp={state.startTimestamp}
-				/>
+				<Timer className="timer mb2" />
 				<div>
 					{playOrPaused}
-					<button className="ma2" onClick={() => store.stopTimer()}>Stop</button>
+					<button className="ma2" onClick={() => store.stopTask()}>Stop</button>
 				</div>
 			</div>
 		)

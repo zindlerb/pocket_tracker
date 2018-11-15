@@ -13,8 +13,8 @@
     [x] inter process communication
     [x] display start stop and pause buttons
     [x] display a timer
-    [ ] have the timer respond to selecting a task
-        [ ] show currently running task
+    [x] have the timer respond to selecting a task
+        [x] show currently running task
     [ ] show different icon for different states
 [ ] show running task in open toolbar
 [ ] clean up code for the running of the timer

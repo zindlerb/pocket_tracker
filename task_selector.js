@@ -17,7 +17,7 @@ class Store extends StoreAbstractBase {
 		console.log('addTask', taskName)
 		this.state.taskNames.add(taskName)
 		ipcRenderer.send('add-task', taskName)
-		this.triggerRender()
+		closeWindow()
 	}
 
 	updateTaskSearch(newSearchString) {
