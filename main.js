@@ -11,7 +11,7 @@ var mb = menubar({
 var win;
 
 const DEBUG = {
-	showDropdownDevTools: false,
+	showDropdownDevTools: true,
 	showToolbarDevTools: true
 }
 
@@ -34,6 +34,8 @@ mb.on('ready', function ready () {
 	}
 })
 
+let taskSwitcherShown = false
+
 mb.on('after-create-window', function () {
 	globalShortcut.register('Command+Shift+R', () => {
 		mb.window.reload()
@@ -41,14 +43,26 @@ mb.on('after-create-window', function () {
   })
 
 	globalShortcut.register('Command+Shift+X', () => {
-		win.show()
+		if (taskSwitcherShown) {
+			win.hide()
+		} else {
+    	win.show()
+		}
+
+		taskSwitcherShown = !taskSwitcherShown
+
 		if (DEBUG.showDropdownDevTools) {
 			win.openDevTools()
 		}
   })
 
-	globalShortcut.register('Command+Shift+H', () => {
+	globalShortcut.register('Command+Shift+C', () => {
+		mb.window.webContents.send('toggleTaskState')
+  })
+
+	globalShortcut.register('esc', () => {
 		win.hide()
+
 		if (DEBUG.showDropdownDevTools) {
 			win.closeDevTools()
 		}

@@ -119,6 +119,14 @@ ipcRenderer.on('add-task', (e, taskName) => {
 	store.startTask(taskName)
 })
 
+ipcRenderer.on('toggleTaskState', (e) => {
+	if (store.state.timerState === RUNNING) {
+		store.pauseTask()
+	} else if (store.state.timerState === PAUSED) {
+		store.startTask(store.state.currentTask)
+	}
+})
+
 class Timer extends Component {
 	componentDidMount() {
   	timerStore.registerComponentContext(this)

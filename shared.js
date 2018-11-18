@@ -14,9 +14,9 @@ export class StoreAbstractBase {
 		this.triggerRender()
 	}
 
-	triggerRender() {
+	triggerRender(onUpdateCallback) {
 		if (!this.componentContext) return;
-		this.componentContext.setState(this.state)
+		this.componentContext.setState(this.state, onUpdateCallback)
 	}
 }
 

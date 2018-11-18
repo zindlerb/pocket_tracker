@@ -14,10 +14,12 @@ class Store extends StoreAbstractBase {
 	}
 
 	addTask(taskName) {
-		console.log('addTask', taskName)
 		this.state.taskNames.add(taskName)
+		this.state.taskSearch = ''
 		ipcRenderer.send('add-task', taskName)
-		closeWindow()
+		this.triggerRender(() => {
+			closeWindow()
+		})
 	}
 
 	updateTaskSearch(newSearchString) {
@@ -98,9 +100,14 @@ class DebouncedInput extends Component {
 }
 
 class SelectionDropdown extends Component {
-	render (props) {
-		console.log('SelectionDropdown PROPS', props)
-		const taskItems = Array.from(props.tasks).map((taskName) => {
+	render ({ tasks, taskSearch }) {
+		if (!tasks.length || !taskSearch) return <div/>
+
+		let filteredTaskSelections = tasks.filter((taskName) => {
+			return taskName.indexOf(taskSearch) > -1
+		})
+
+		const taskItems = filteredTaskSelections.map((taskName) => {
     	return <li className="selection-dropdown-item">{taskName}</li>
 		})
 
@@ -133,7 +140,8 @@ class TaskSelector extends Component {
 	}
 
 	render(props, state) {
-		console.log('state', state)
+		const {taskSearch, taskNames} = state
+		const tasksArray = Array.from(taskNames || [])
 
 		return (
 			<div onClick={closeWindow} className="task-selector-container">
@@ -146,7 +154,7 @@ class TaskSelector extends Component {
 							localStore.updateTaskSearch(value)
 						}}
 					/>
-					<SelectionDropdown tasks={state.taskNames || []} />
+					<SelectionDropdown tasks={tasksArray} taskSearch={taskSearch} />
 				</div>
 			</div>
 		)
