@@ -197,6 +197,12 @@ class Table extends Component {
 				label
 
 				column config could take a custom renderer (not good here but could be good for bz?)
+
+				it should handle scroll in a generally acceptable way
+					scroll on body - body has column flex grow and overflows to bottom of container
+
+				per the css tricks article are the rows even needed?
+					they may be nicer for outward styling..
 		*/
 
 		return (
