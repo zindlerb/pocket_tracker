@@ -188,6 +188,45 @@ const beginningOfDayTimestamp = () => {
 	return new Date(now.getFullYear(), now.getMonth(), now.getDate());
 }
 
+class Table extends Component {
+	render({ className, columnConfig, rows }) { // Open Q. Do obj or positional here?
+		/*
+			column config:
+				columnClass
+				style
+				label
+
+				column config could take a custom renderer (not good here but could be good for bz?)
+		*/
+
+		return (
+			<div className={cx('table', className)}>
+				<div className="header row flex">
+					{columnConfig.map(({ label, columnClass, columnStyle }) => <div className={cx("column-item", columnClass, columnStyle)}>{label}</div>)}
+				</div>
+				{
+					rows.map((columnItems) => {
+						return (
+							<div className="row flex">
+								{
+									columnItems.map((columnItem, colInd) => {
+										return (
+											<div
+												className={cx("column-item", columnConfig[colInd].columnClass, columnConfig[colInd].columnStyle)}>
+												{columnItem}
+											</div>
+										)
+									})
+								}
+							</div>
+						)
+					})
+				}
+			</div>
+		)
+	}
+}
+
 class TaskLog extends Component {
 	taskSessionSummary(taskSessions, taskName) {
 		const totalDuration = taskSessions.reduce((total, { startTimestamp, endTimestamp }) => {
@@ -201,7 +240,7 @@ class TaskLog extends Component {
 			}, 0)
 
 		return (
-			<div className="cf pv2">
+			<div className="task-log-row cf pv2">
 				<div className="task-name fl ph1">{taskName}</div>
 				<div className="day-amount fr ph1">{humanReadableTime(totalDayDuration)}</div>
 				<div className="total-amount fr ph1">{humanReadableTime(totalDuration)}</div>
@@ -212,6 +251,11 @@ class TaskLog extends Component {
 	render({ allTaskSessions }) {
 		return (
 			<div>
+				<div className="task-log-headers">
+					<div>Task</div>
+					<div>Today</div>
+					<div>Total</div>
+				</div>
 				{
 					_.map(
 						allTaskSessions,
