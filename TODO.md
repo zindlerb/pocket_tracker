@@ -18,16 +18,25 @@
 [x] show running task in open toolbar
 [x] clean up code for the running of the timer
 [x] dropdown of existing tasks fuzzy search select them
-[ ] same key as open to close, escape to close
-[ ] up and down arrows to select into dropdown
-[ ] shortcut to play and pause tasks
-[ ] show list of tasks in toolbar with amount of time spent on them
+[x] same key as open to close, escape to close
+[x] up and down arrows to select into dropdown
+[x] shortcut to play and pause tasks
+[x] play/pause not working
+[x] show list of tasks in toolbar with amount of time spent on them
+[ ] turn the display of tasks into a table.. need to have the columns align correctly
+    [ ] lookup flexbox tables
 [ ] way to persist tasks on device
     [ ] how to do this?
-[ ] way to persist data - flat file json that is versioned
     https://medium.com/cameron-nokes/how-to-store-user-data-in-electron-3ba6bf66bc1e
-[ ] clean up code and deploy finished version 0.1
-[ ] show different icon for different states
+[ ] grab fuzzy search lib and get improved fuzzy search
+[ ] fix issue with initial timestamp. I should be backsetting it based on the duration - right now it does not account for pauses
+[ ] clean up code and deploy finished version 0.1 - figure out how to build
+[ ] design better ui / icon
+    [ ] quit button
+    [ ] export data button
+    [ ] show different icon for different states
+[ ] code up v1 ui
+[ ] use it for a week and incrementally add features
 
 
 # ISSUES:
@@ -35,3 +44,5 @@
 
 # Q's
 is it better to have the first one selected and then have it be create new one orrr be dropdown to select
+
+Consider making the day timestamp be a rolling last 24 hrs?

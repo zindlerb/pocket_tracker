@@ -7,6 +7,7 @@ body {
   width: 100%;
 	height: 100%;
 	font-size: 20px;
+  padding: 6px;
 }
 
 .task-selector-container {
@@ -35,5 +36,15 @@ body {
 }
 
 .selection-dropdown-item {
-  padding: 8px 0px;
+  padding: 12px;
+  border-bottom: 1px solid gray;
+}
+
+.selection-dropdown-item.create-task {
+  color: gray;
+  font-style: italic;
+}
+
+.selection-dropdown-item.active {
+	background-color: tomato;
 }

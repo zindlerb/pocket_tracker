@@ -4,28 +4,81 @@ import { h, render, Component } from 'preact';
 import { remote, ipcRenderer } from 'electron'
 import Mousetrap from 'mousetrap';
 import {StoreAbstractBase} from './shared.js'
+import cx from 'classnames'
+
+const ADD_NEW_TASK = "<<<~ADD_NEW_TASK~>>>"
+
+const filterTasksOptions = (taskName, taskOptions) => {
+	const filteredOptions = taskOptions.filter((taskOption) => taskOption.includes(taskName))
+
+  return filteredOptions.concat([ADD_NEW_TASK])
+}
 
 class Store extends StoreAbstractBase {
 	constructor() {
 		super({
 			taskSearch: '',
-    	taskNames: new Set([])
+    	taskNames: [
+        'a task',
+        'task',
+        'tsk',
+        'blob'
+      ],
+      filteredTaskNames: [ADD_NEW_TASK],
+      selectedTaskIndex: 0
 		})
 	}
 
-	addTask(taskName) {
-		this.state.taskNames.add(taskName)
+	selectTask(taskName) {
+		const {filteredTaskNames, selectedTaskIndex, taskNames} = this.state
+		const selectedOption = filteredTaskNames[selectedTaskIndex]
+		let selectedTaskName;
+
+		if (selectedOption === ADD_NEW_TASK) {
+			if (!taskNames.includes(taskName)) {
+				this.state.taskNames.push(taskName)
+				selectedTaskName = taskName
+    	} else {
+				throw `Attempt to add duplicate task name ${taskName}, ${taskNames}`
+			}
+		} else {
+			selectedTaskName = selectedOption
+		}
+
 		this.state.taskSearch = ''
-		ipcRenderer.send('add-task', taskName)
+		ipcRenderer.send('add-task', selectedTaskName) // TODO: rename
 		this.triggerRender(() => {
 			closeWindow()
 		})
 	}
 
 	updateTaskSearch(newSearchString) {
-		this.state.taskSearch = newSearchString
-		this.triggerRender()
+    this.setState({
+      taskSearch: newSearchString,
+      filteredTaskNames: filterTasksOptions(newSearchString, this.state.taskNames),
+      selectedTaskIndex: 0
+    })
 	}
+
+  moveTaskSelectionUp() {
+		const {selectedTaskIndex, filteredTaskNames} = this.state
+		let newIndex = selectedTaskIndex - 1;
+		if (newIndex < 0) {
+			newIndex = filteredTaskNames.length - 1
+		}
+
+		this.setState({selectedTaskIndex: newIndex})
+  }
+
+  moveTaskSelectionDown() {
+		const {selectedTaskIndex, filteredTaskNames} = this.state
+		let newIndex = selectedTaskIndex + 1;
+		if (newIndex > (filteredTaskNames.length - 1)) {
+			newIndex = 0
+		}
+
+		this.setState({selectedTaskIndex: newIndex})
+  }
 }
 
 const localStore = new Store()
@@ -82,14 +135,11 @@ class DebouncedInput extends Component {
 
 
 		this.debouncedOnChange = (e) => {
-			console.log('called', e)
 			props.onChange(e.target.value)
 		}
 	}
 
 	render(props, state) {
-		console.log(_.omit(props, ['onChange', 'debounceWaitTime']))
-
   	return (
 			<input
 				{...(_.omit(props, ['onChange', 'debounceWaitTime']))}
@@ -100,15 +150,23 @@ class DebouncedInput extends Component {
 }
 
 class SelectionDropdown extends Component {
-	render ({ tasks, taskSearch }) {
-		if (!tasks.length || !taskSearch) return <div/>
-
-		let filteredTaskSelections = tasks.filter((taskName) => {
-			return taskName.indexOf(taskSearch) > -1
-		})
-
-		const taskItems = filteredTaskSelections.map((taskName) => {
-    	return <li className="selection-dropdown-item">{taskName}</li>
+	render ({ tasks, selectedTaskIndex }) {
+		const taskItems = tasks.map((taskName, index) => {
+			if (taskName === ADD_NEW_TASK) {
+				return (
+					<li
+						className={cx("selection-dropdown-item create-task", {active: selectedTaskIndex === index})}>
+						+ Create New Task
+					</li>
+				)
+			} else {
+				return (
+					<li
+						className={cx("selection-dropdown-item", {active: selectedTaskIndex === index})}>
+						{taskName}
+					</li>
+				)
+			}
 		})
 
 		return (
@@ -132,16 +190,31 @@ class TaskSelector extends Component {
 		localStore.registerComponentContext(this)
 
 		window.addEventListener('keyup', (e) => {
-			if (e.keyCode === 13) { // Enter Pressed
-				// TODO: handle moving the dropdown selection
-				localStore.addTask(this.state.taskSearch)
+			if (e.keyCode === 13) { // Enter
+				localStore.selectTask(this.state.taskSearch)
+			} else if (e.keyCode === 38) { // Up Key
+				localStore.moveTaskSelectionUp()
+			} else if (e.keyCode === 40) { // Down Key
+				localStore.moveTaskSelectionDown()
+			}
+		})
+
+		window.addEventListener('keydown', (e) => {
+			if (e.keyCode === 38) { // Up Key
+				e.preventDefault()
+			} else if (e.keyCode === 40) { // Down Key
+				e.preventDefault()
 			}
 		})
 	}
 
 	render(props, state) {
-		const {taskSearch, taskNames} = state
-		const tasksArray = Array.from(taskNames || [])
+		const {taskSearch, filteredTaskNames, selectedTaskIndex} = state
+		let dropdown;
+
+		if (taskSearch && taskSearch.length) {
+			dropdown = <SelectionDropdown tasks={filteredTaskNames}  selectedTaskIndex={selectedTaskIndex} />
+		}
 
 		return (
 			<div onClick={closeWindow} className="task-selector-container">
@@ -154,7 +227,7 @@ class TaskSelector extends Component {
 							localStore.updateTaskSearch(value)
 						}}
 					/>
-					<SelectionDropdown tasks={tasksArray} taskSearch={taskSearch} />
+					{dropdown}
 				</div>
 			</div>
 		)

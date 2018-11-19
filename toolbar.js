@@ -10,7 +10,7 @@ class Store extends StoreAbstractBase {
 		super({
 			timerState: STOPPED,
 			currentTask: null,
-			tasks: {},
+			allTaskSessions: {}
 		})
 
 		this.timerStore = timerStore
@@ -21,15 +21,19 @@ class Store extends StoreAbstractBase {
 		this.timerStore.pause()
 	}
 
-	minimizeWindow() {
-		// bad name
+	minimizeWindow() { // bad name
 		this.setState({ timerState: MINIMIZED })
 		this.timerStore.minimize()
 	}
 
 	stopTask() {
-		// TODO: add to sessions here
-		this.setState({ timerState: STOPPED })
+		this.state.allTaskSessions[this.state.currentTask].push({
+    	startTimestamp: this.timerStore.state.startTimestamp,
+			endTimestamp: Date.now()
+		})
+
+		this.state.timerState = STOPPED
+		this.triggerRender()
 		this.timerStore.stop()
 	}
 
@@ -39,15 +43,19 @@ class Store extends StoreAbstractBase {
 	}
 
 	startTask(taskName) {
-		this.state.currentTask = taskName
-		this.state.timerState = PLAYING
-		if (!this.state.tasks[taskName]) {
-			this.state.tasks[taskName] = {
-      	sessions: []
-			}
+		const {currentTask, timerState} = this.state
+
+		if (timerState !== STOPPED && currentTask !== taskName) {
+			this.stopTask()
 		}
 
-		this.timerStore.start(this.state.timerState)
+		this.state.currentTask = taskName
+		this.timerStore.start(timerState)
+		this.state.timerState = PLAYING
+		if (!this.state.allTaskSessions[taskName]) {
+			this.state.allTaskSessions[taskName] = []
+		}
+
 		this.triggerRender()
 	}
 }
@@ -60,12 +68,22 @@ class TimerStore extends StoreAbstractBase {
 	}
 
 	start(currentTimerState) {
-		const {lastMinimizedAt} = this.state
+		let newDurationMillis;
+		const {lastMinimizedAt, durationMillis, runningTimerId} = this.state
+		clearInterval(runningTimerId)
+
+		if (currentTimerState === MINIMIZED) {
+			newDurationMillis = (Date.now() - lastMinimizedAt)
+		} else if (currentTimerState === PAUSED) {
+			newDurationMillis = durationMillis
+		} else {
+			newDurationMillis = 0
+		}
 
 		this.setState({
 			timerState: PLAYING,
       startTimestamp: this.state.startTimestamp || Date.now(),
-			durationMillis: currentTimerState === MINIMIZED ? (Date.now() - lastMinimizedAt) : 0,
+			durationMillis: newDurationMillis,
 			runningTimerId: setInterval(() => {
 				this.state.durationMillis += (1000 / this.framesPerSecond)
 				this.triggerRender()
@@ -73,7 +91,7 @@ class TimerStore extends StoreAbstractBase {
 		})
 	}
 
-	stop(currentTimerState) {
+	stop() {
 		clearInterval(this.state.runningTimerId)
 		this.setState({
 			startTimestamp: null,
@@ -147,6 +165,64 @@ class Timer extends Component {
 	}
 }
 
+const secondInMillis = 1000
+const minuteInMillis = 60 * secondInMillis
+const hourInMillis = 60 * minuteInMillis
+const dayInMillis = 24 * hourInMillis
+
+const humanReadableTime = (milliseconds) => {
+	const precision = 1
+	if (milliseconds > dayInMillis) {
+		return `${_.floor(milliseconds/dayInMillis, precision)} days`
+	} else if (milliseconds > hourInMillis) {
+		return `${_.floor(milliseconds/hourInMillis, precision)} hrs`
+	} else if (milliseconds > minuteInMillis) {
+		return `${_.floor(milliseconds/minuteInMillis, precision)} mins`
+	} else {
+		return `${_.floor(milliseconds/secondInMillis, precision)} secs`
+	}
+}
+
+const beginningOfDayTimestamp = () => {
+  var now = new Date();
+	return new Date(now.getFullYear(), now.getMonth(), now.getDate());
+}
+
+class TaskLog extends Component {
+	taskSessionSummary(taskSessions, taskName) {
+		const totalDuration = taskSessions.reduce((total, { startTimestamp, endTimestamp }) => {
+			return total + (endTimestamp - startTimestamp)
+		}, 0)
+
+		const totalDayDuration = taskSessions
+			.filter(({ startTimestamp }) => startTimestamp > beginningOfDayTimestamp())
+			.reduce((total, { startTimestamp, endTimestamp }) => {
+     		return total + (endTimestamp - startTimestamp)
+			}, 0)
+
+		return (
+			<div className="cf pv2">
+				<div className="task-name fl ph1">{taskName}</div>
+				<div className="day-amount fr ph1">{humanReadableTime(totalDayDuration)}</div>
+				<div className="total-amount fr ph1">{humanReadableTime(totalDuration)}</div>
+			</div>
+		)
+	}
+
+	render({ allTaskSessions }) {
+		return (
+			<div>
+				{
+					_.map(
+						allTaskSessions,
+						(taskSessions, taskName) => this.taskSessionSummary(taskSessions, taskName)
+					)
+				}
+			</div>
+		)
+	}
+}
+
 class Toolbar extends Component {
 	constructor() {
 		super()
@@ -184,6 +260,7 @@ class Toolbar extends Component {
 					{playOrPaused}
 					<button className="ma2" onClick={() => store.stopTask()}>Stop</button>
 				</div>
+				<TaskLog allTaskSessions={state.allTaskSessions} />
 			</div>
 		)
 	}

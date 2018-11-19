@@ -34,8 +34,6 @@ mb.on('ready', function ready () {
 	}
 })
 
-let taskSwitcherShown = false
-
 mb.on('after-create-window', function () {
 	globalShortcut.register('Command+Shift+R', () => {
 		mb.window.reload()
@@ -43,13 +41,7 @@ mb.on('after-create-window', function () {
   })
 
 	globalShortcut.register('Command+Shift+X', () => {
-		if (taskSwitcherShown) {
-			win.hide()
-		} else {
-    	win.show()
-		}
-
-		taskSwitcherShown = !taskSwitcherShown
+		win.show() // TODO: add in toggle show
 
 		if (DEBUG.showDropdownDevTools) {
 			win.openDevTools()
