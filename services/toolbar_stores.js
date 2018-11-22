@@ -1,20 +1,28 @@
-import { loadData, saveData } from './persistance.js'
+import { loadData, saveData, deleteData } from './persistance.js'
 import {StoreAbstractBase, PLAYING, PAUSED, STOPPED, MINIMIZED} from '../shared.js'
+
+const getInitialState = () => {
+  return {
+		timerState: STOPPED,
+		currentTask: null,
+		allTaskSessions: {}
+	}
+}
 
 class ToolbarStore extends StoreAbstractBase {
 	constructor(timerStore) {
-		const defaultData = {
-			timerState: STOPPED,
-			currentTask: null,
-			allTaskSessions: {}
-		}
-
-		super(defaultData)
+		super(getInitialState())
 		loadData((data) => {
 			if (data) this.setState(data)
 		})
 
 		this.timerStore = timerStore
+	}
+
+	deleteData() {
+		deleteData()
+		this.state = getInitialState()
+		this.triggerRender()
 	}
 
 	pauseTask() {

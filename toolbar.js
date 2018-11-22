@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import { h, render, Component } from 'preact';
 import {PLAYING, PAUSED, STOPPED, MINIMIZED} from './shared.js'
-import { ipcRenderer } from 'electron'
+import { ipcRenderer, remote } from 'electron'
 import './toolbar.css'
 import cx from 'classnames'
 import {toolbarTimerStore, toolbarStore} from './services/toolbar_stores.js'
@@ -94,9 +94,7 @@ class Table extends Component {
 
 		let numberOfUnfixedColumns = columnConfig.filter(({ columnWidthPercentage }) => !columnWidthPercentage).length
 		let sizeOfUnfixedColumn = (1 - totalFixedColumnPercentage) / numberOfUnfixedColumns // TODO: for perf these calculations should really be cached.
-		console.log('sizeOfUnfixedColumn', sizeOfUnfixedColumn)
 		const headerColumns = columnConfig.map(({ label, columnClass, columnWidthPercentage }) => {
-			console.log('columnWidthPercentage', columnWidthPercentage)
 			return (
 				<div
 					className={cx("column-item", columnClass)}
@@ -154,41 +152,60 @@ class TaskLog extends Component {
 	}
 
 	render({ allTaskSessions }) {
-		console.log('allTaskSessions', allTaskSessions)
-
 		return (
 			<Table
 			className="task-log"
 			columnConfig={[
-				{ label: 'Task', columnClass: 'tl', columnWidthPercentage: .5 },
+				{ label: 'Task', columnClass: 'tl', columnWidthPercentage: .6 },
 				{ label: 'Today', columnClass: 'tl' },
 				{ label: 'Total', columnClass: 'tl' },
 			]}
 			rows={
-				_.map(
+				_.compact(_.map(
 					allTaskSessions,
 					(taskSessions, taskName) => this.taskSessionSummary(taskSessions, taskName)
-				)
+				))
 			}
 			/>
 		)
 	}
 }
 
+const Menu = ({ onClose }) => {
+	return (
+		<div className="pa3">
+			<div className="clickable pa2 tc" onClick={onClose}>Back</div>
+			<div className="clickable pa2 tc" onClick={() => toolbarStore.deleteData()}>Delete Data</div>
+			<div className="clickable pa2 tc" onClick={() => {
+				ipcRenderer.send('exit-app')
+				remote.getCurrentWindow().close()
+			}}>Exit App</div>
+		</div>
+	)
+}
+
 class Toolbar extends Component {
 	constructor() {
 		super()
-		this.state = {}
+		this.state = { isMenuOpen: false }
 	}
 
 	componentDidMount() {
 		toolbarStore.registerComponentContext(this)
 	}
 
+	openMenu() {
+		this.setState({ isMenuOpen: true })
+	}
+
+	closeMenu() {
+		this.setState({ isMenuOpen: false })
+	}
+
 	render(props, state) {
 		let playOrPaused = (
 			<button
-				className={cx("ma2", { disabled: !state.currentTask })}
+				className={cx("ma2", { disabled: !state.currentTask, clickable: state.currentTask })}
 				onClick={() => {
 					if (state.currentTask) {
 						toolbarStore.startTask(state.currentTask)
@@ -198,23 +215,30 @@ class Toolbar extends Component {
 			</button>
 		)
 		if (state.timerState === PLAYING) {
-			playOrPaused = <button className="ma2" onClick={() => toolbarStore.pauseTask()}>Pause</button>
+			playOrPaused = <button className="ma2 clickable" onClick={() => toolbarStore.pauseTask()}>Pause</button>
 		}
 
-		return (
-			<div className="pa2 tc">
-				<div
-					className={cx('current-task mv2', state.currentTask ? 'selected' : 'blank')}>
-					{state.currentTask || 'select task'}
+		if (!state.isMenuOpen) {
+			return (
+				<div className="pa2 tc toolbar-container">
+					<div className="menu-button clickable" onClick={this.openMenu.bind(this)}>
+						Menu
+					</div>
+					<div
+						className={cx('current-task mv2', state.currentTask ? 'selected' : 'blank')}>
+						{state.currentTask || 'select task'}
+					</div>
+					<Timer className="timer mb2" />
+					<div className="mb3">
+						{playOrPaused}
+						<button className="ma2 clickable" onClick={() => toolbarStore.stopTask()}>Stop</button>
+					</div>
+					<TaskLog allTaskSessions={state.allTaskSessions} />
 				</div>
-				<Timer className="timer mb2" />
-				<div>
-					{playOrPaused}
-					<button className="ma2" onClick={() => toolbarStore.stopTask()}>Stop</button>
-				</div>
-				<TaskLog allTaskSessions={state.allTaskSessions} />
-			</div>
-		)
+			)
+		} else {
+			return <Menu onClose={() => this.setState({ isMenuOpen: false })} />
+		}
 	}
 }
 

@@ -1,3 +1,7 @@
+textarea:focus, input:focus{
+	outline: none;
+}
+
 body {
 	overflow: hidden;
   margin: 0px;
@@ -34,10 +38,12 @@ body {
 	list-style: none;
 	padding: 0px;
 }
-
 .selection-dropdown-item {
   padding: 12px;
-  border-bottom: 1px solid gray;
+}
+
+.selection-dropdown-item:not(:last-child) {
+  border-bottom: 1px solid #B3B3B3;
 }
 
 .selection-dropdown-item.create-task {
@@ -46,5 +52,5 @@ body {
 }
 
 .selection-dropdown-item.active {
-	background-color: tomato;
+	background-color: #EDEDED;
 }

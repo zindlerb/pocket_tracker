@@ -5,6 +5,7 @@ import { remote, ipcRenderer } from 'electron'
 import Mousetrap from 'mousetrap';
 import {StoreAbstractBase} from './shared.js'
 import cx from 'classnames'
+import {loadData} from './services/persistance.js'
 
 const ADD_NEW_TASK = "<<<~ADD_NEW_TASK~>>>"
 
@@ -18,14 +19,13 @@ class Store extends StoreAbstractBase {
 	constructor() {
 		super({
 			taskSearch: '',
-    	taskNames: [
-        'a task',
-        'task',
-        'tsk',
-        'blob'
-      ],
+    	taskNames: [],
       filteredTaskNames: [ADD_NEW_TASK],
       selectedTaskIndex: 0
+		})
+
+		loadData(({ allTaskSessions }) => {
+			this.setState({ taskNames: Object.keys(allTaskSessions) })
 		})
 	}
 

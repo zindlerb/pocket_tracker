@@ -1,3 +1,18 @@
+.clickable {
+  cursor: pointer;
+}
+
+.clickable:hover {
+  opacity: 0.7;
+}
+
+.menu-button {
+	position: absolute;
+	top: 8px;
+	right: 8px;
+	color: #85a3ff;
+}
+
 .current-task.selected {
 
 }
@@ -34,4 +49,8 @@ button {
 
 .disabled {
   opacity: 0.4
+}
+
+.toolbar-container {
+	position: relative;
 }

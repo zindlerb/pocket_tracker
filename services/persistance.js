@@ -20,6 +20,15 @@ const saveData = (data) => {
 	}
 }
 
+const deleteData = () => {
+	try {
+  	fs.unlinkSync(FILE_PATH)
+	} catch (e) {
+		console.log(e.code)
+		throw e;
+	}
+}
+
 const loadData = (cb) => { // TODO: use promises
 	fs.readFile(FILE_PATH, (err, data) => {
 		if (!err) {
@@ -32,4 +41,4 @@ const loadData = (cb) => { // TODO: use promises
 	})
 }
 
-module.exports = { saveData, loadData }
+module.exports = { saveData, loadData, deleteData }

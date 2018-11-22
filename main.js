@@ -4,8 +4,8 @@ var menubar = require('menubar');
 var globalShortcut = require('electron').globalShortcut
 var mb = menubar({
 	alwaysOnTop: true,
-	width: 250,
-	height: 300
+	width: 300,
+	height: 350
 })
 
 var win;
@@ -71,4 +71,8 @@ mb.on('hide', function () {
 
 ipc.on('add-task', function (e, taskName) {
 	mb.window.webContents.send('add-task', taskName)
+})
+
+ipc.on('exit-app', function (e, taskName) {
+	mb.tray.destroy()
 })

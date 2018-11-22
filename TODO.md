@@ -1,3 +1,7 @@
+what does slack first diagramming look like?
+Or notion first diagramming?
+
+
 # TODOS
 [x] figure out how to open dev tools
 [x] figure out how to hot reload code
@@ -26,18 +30,27 @@
 [x] turn the display of tasks into a table.. need to have the columns align correctly
     [x] lookup flexbox tables -
 [x] repeatedly hiting stop does some wild shit
-[ ] way to persist tasks on device
-    [ ] how to do this?
+[x] way to persist tasks on device
+    [x] how to do this?
     https://medium.com/cameron-nokes/how-to-store-user-data-in-electron-3ba6bf66bc1e
-[ ] confirm that saving works.
-[ ] get the auto complete loading correctly
+[x] make select from tasteful
+[x] confirm that saving works.
+[x] get the auto complete loading correctly
+[x] get the menu items working
+[x] remove the glows around button clicks and task selector input
 [ ] grab fuzzy search lib and get improved fuzzy search
-[ ] make select from tasteful
+    http://fusejs.io/
 [ ] pressing enter with nothing in the search box should not do anything. it should close.. yes
 [ ] fix issue with initial timestamp. I should be backsetting it based on the duration - right now it does not account for pauses
 [ ] set up icons from sketch
 [ ] break some code into seperate files
 [ ] add a menu icon that has an exit, download data button, delete data button (don't really delete just move it over to new data set)
+[ ] rename app
+[ ] get the version number from the package json
+[ ] truncate text for long names
+    https://developer.mozilla.org/en-US/docs/Web/CSS/text-overflow - overflow: ellipsis
+[ ] scrolling for too many tasks
+[ ] order tasks by most used that day
 [ ] clean up code and deploy finished version 0.1 - figure out how to build
 [ ] hotkey to bring up inspector, make state global?
 [ ] begin using and make record of bugs
@@ -45,6 +58,10 @@
     [ ] make more pleasing on the eyes. the all white is blegh
     [ ] more pleasing dropdown selection
 
+
+I want to be able to modify my history -
+- delete entries
+- add entries
 
 # ISSUES:
 - cannot do open toolbar via hotkey due to api not giving coordinates of the toolbar..
