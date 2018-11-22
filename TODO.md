@@ -23,20 +23,27 @@
 [x] shortcut to play and pause tasks
 [x] play/pause not working
 [x] show list of tasks in toolbar with amount of time spent on them
-[ ] turn the display of tasks into a table.. need to have the columns align correctly
-    [ ] lookup flexbox tables
+[x] turn the display of tasks into a table.. need to have the columns align correctly
+    [x] lookup flexbox tables -
+[x] repeatedly hiting stop does some wild shit
 [ ] way to persist tasks on device
     [ ] how to do this?
     https://medium.com/cameron-nokes/how-to-store-user-data-in-electron-3ba6bf66bc1e
+[ ] confirm that saving works.
+[ ] get the auto complete loading correctly
 [ ] grab fuzzy search lib and get improved fuzzy search
+[ ] make select from tasteful
+[ ] pressing enter with nothing in the search box should not do anything. it should close.. yes
 [ ] fix issue with initial timestamp. I should be backsetting it based on the duration - right now it does not account for pauses
+[ ] set up icons from sketch
+[ ] break some code into seperate files
+[ ] add a menu icon that has an exit, download data button, delete data button (don't really delete just move it over to new data set)
 [ ] clean up code and deploy finished version 0.1 - figure out how to build
+[ ] hotkey to bring up inspector, make state global?
+[ ] begin using and make record of bugs
 [ ] design better ui / icon
-    [ ] quit button
-    [ ] export data button
-    [ ] show different icon for different states
-[ ] code up v1 ui
-[ ] use it for a week and incrementally add features
+    [ ] make more pleasing on the eyes. the all white is blegh
+    [ ] more pleasing dropdown selection
 
 
 # ISSUES:

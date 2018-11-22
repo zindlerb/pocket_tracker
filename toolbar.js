@@ -1,153 +1,38 @@
 import _ from 'lodash'
 import { h, render, Component } from 'preact';
-import {StoreAbstractBase, PLAYING, PAUSED, STOPPED, MINIMIZED} from './shared.js'
+import {PLAYING, PAUSED, STOPPED, MINIMIZED} from './shared.js'
 import { ipcRenderer } from 'electron'
 import './toolbar.css'
 import cx from 'classnames'
-
-class Store extends StoreAbstractBase {
-	constructor(timerStore) {
-		super({
-			timerState: STOPPED,
-			currentTask: null,
-			allTaskSessions: {}
-		})
-
-		this.timerStore = timerStore
-	}
-
-	pauseTask() {
-		this.setState({ timerState: PAUSED })
-		this.timerStore.pause()
-	}
-
-	minimizeWindow() { // bad name
-		this.setState({ timerState: MINIMIZED })
-		this.timerStore.minimize()
-	}
-
-	stopTask() {
-		this.state.allTaskSessions[this.state.currentTask].push({
-    	startTimestamp: this.timerStore.state.startTimestamp,
-			endTimestamp: Date.now()
-		})
-
-		this.state.timerState = STOPPED
-		this.triggerRender()
-		this.timerStore.stop()
-	}
-
-	resumeTask() {
-		this.timerStore.start(this.state.timerState)
-		this.setState({ timerState: PLAYING })
-	}
-
-	startTask(taskName) {
-		const {currentTask, timerState} = this.state
-
-		if (timerState !== STOPPED && currentTask !== taskName) {
-			this.stopTask()
-		}
-
-		this.state.currentTask = taskName
-		this.timerStore.start(timerState)
-		this.state.timerState = PLAYING
-		if (!this.state.allTaskSessions[taskName]) {
-			this.state.allTaskSessions[taskName] = []
-		}
-
-		this.triggerRender()
-	}
-}
-
-class TimerStore extends StoreAbstractBase {
-  constructor() {
-		super({})
-		this.framesPerSecond = 30
-		this.stop()
-	}
-
-	start(currentTimerState) {
-		let newDurationMillis;
-		const {lastMinimizedAt, durationMillis, runningTimerId} = this.state
-		clearInterval(runningTimerId)
-
-		if (currentTimerState === MINIMIZED) {
-			newDurationMillis = (Date.now() - lastMinimizedAt)
-		} else if (currentTimerState === PAUSED) {
-			newDurationMillis = durationMillis
-		} else {
-			newDurationMillis = 0
-		}
-
-		this.setState({
-			timerState: PLAYING,
-      startTimestamp: this.state.startTimestamp || Date.now(),
-			durationMillis: newDurationMillis,
-			runningTimerId: setInterval(() => {
-				this.state.durationMillis += (1000 / this.framesPerSecond)
-				this.triggerRender()
-			}, 1000/this.framesPerSecond)
-		})
-	}
-
-	stop() {
-		clearInterval(this.state.runningTimerId)
-		this.setState({
-			startTimestamp: null,
-			lastMinimizedAt: null,
-			durationMillis: 0,
-			runningTimerId: null
-		})
-	}
-
-	pause() {
-		clearInterval(this.state.runningTimerId)
-		this.setState({
-			runningTimerId: null
-		})
-	}
-
-	minimize() {
-		clearInterval(this.state.runningTimerId)
-		this.setState({
-			lastMinimizedAt: Date.now(),
-			runningTimerId: null
-		})
-	}
-}
-
-const timerStore = new TimerStore()
-const store = new Store(timerStore)
-
+import {toolbarTimerStore, toolbarStore} from './services/toolbar_stores.js'
 
 ipcRenderer.on('toolbarHide', () => {
-	if (store.state.timerState === PLAYING) {
-		store.minimizeWindow()
+	if (toolbarStore.state.timerState === PLAYING) {
+		toolbarStore.minimizeWindow()
 	}
 })
 
 ipcRenderer.on('toolbarShow', () => {
-	if (store.state.timerState === MINIMIZED) {
-		store.resumeTask()
+	if (toolbarStore.state.timerState === MINIMIZED) {
+		toolbarStore.resumeTask()
 	}
 })
 
 ipcRenderer.on('add-task', (e, taskName) => {
-	store.startTask(taskName)
+	toolbarStore.startTask(taskName)
 })
 
 ipcRenderer.on('toggleTaskState', (e) => {
-	if (store.state.timerState === RUNNING) {
-		store.pauseTask()
-	} else if (store.state.timerState === PAUSED) {
-		store.startTask(store.state.currentTask)
+	if (toolbarStore.state.timerState === RUNNING) {
+		toolbarStore.pauseTask()
+	} else if (toolbarStore.state.timerState === PAUSED) {
+		toolbarStore.startTask(toolbarStore.state.currentTask)
 	}
 })
 
 class Timer extends Component {
 	componentDidMount() {
-  	timerStore.registerComponentContext(this)
+		toolbarTimerStore.registerComponentContext(this)
 	}
 
 	render(props, { durationMillis }) {
@@ -173,18 +58,18 @@ const dayInMillis = 24 * hourInMillis
 const humanReadableTime = (milliseconds) => {
 	const precision = 1
 	if (milliseconds > dayInMillis) {
-		return `${_.floor(milliseconds/dayInMillis, precision)} days`
+		return `${_.floor(milliseconds/dayInMillis, precision)}d`
 	} else if (milliseconds > hourInMillis) {
-		return `${_.floor(milliseconds/hourInMillis, precision)} hrs`
+		return `${_.floor(milliseconds/hourInMillis, precision)}h`
 	} else if (milliseconds > minuteInMillis) {
-		return `${_.floor(milliseconds/minuteInMillis, precision)} mins`
+		return `${_.floor(milliseconds/minuteInMillis, precision)}m`
 	} else {
-		return `${_.floor(milliseconds/secondInMillis, precision)} secs`
+		return `${_.floor(milliseconds/secondInMillis, precision)}s`
 	}
 }
 
 const beginningOfDayTimestamp = () => {
-  var now = new Date();
+	var now = new Date();
 	return new Date(now.getFullYear(), now.getMonth(), now.getDate());
 }
 
@@ -200,25 +85,43 @@ class Table extends Component {
 
 				it should handle scroll in a generally acceptable way
 					scroll on body - body has column flex grow and overflows to bottom of container
-
-				per the css tricks article are the rows even needed?
-					they may be nicer for outward styling..
 		*/
 
+		let totalFixedColumnPercentage = columnConfig.reduce((total, { columnWidthPercentage }) => total + (columnWidthPercentage || 0), 0)
+		if (totalFixedColumnPercentage > 1) { // TODO: should also have is number check here
+			throw "Invalid column config. Must not have the sum of the column width percentages exceed 1."
+		}
+
+		let numberOfUnfixedColumns = columnConfig.filter(({ columnWidthPercentage }) => !columnWidthPercentage).length
+		let sizeOfUnfixedColumn = (1 - totalFixedColumnPercentage) / numberOfUnfixedColumns // TODO: for perf these calculations should really be cached.
+		console.log('sizeOfUnfixedColumn', sizeOfUnfixedColumn)
+		const headerColumns = columnConfig.map(({ label, columnClass, columnWidthPercentage }) => {
+			console.log('columnWidthPercentage', columnWidthPercentage)
+			return (
+				<div
+					className={cx("column-item", columnClass)}
+					style={{ width: `${(columnWidthPercentage || sizeOfUnfixedColumn) * 100}%` }}>
+					{label}
+				</div>
+			)
+		})
+
 		return (
-			<div className={cx('table', className)}>
-				<div className="header row flex">
-					{columnConfig.map(({ label, columnClass, columnStyle }) => <div className={cx("column-item", columnClass, columnStyle)}>{label}</div>)}
+			<div className={cx('table w-100', className)}>
+				<div className="header row flex tl">
+					{headerColumns}
 				</div>
 				{
 					rows.map((columnItems) => {
 						return (
-							<div className="row flex">
+							<div className="row flex tl">
 								{
 									columnItems.map((columnItem, colInd) => {
+										const { columnClass, columnWidthPercentage } = columnConfig[colInd]
 										return (
 											<div
-												className={cx("column-item", columnConfig[colInd].columnClass, columnConfig[colInd].columnStyle)}>
+												className={cx("column-item", columnClass)}
+												style={{width: `${(columnWidthPercentage || sizeOfUnfixedColumn) * 100}%`}}>
 												{columnItem}
 											</div>
 										)
@@ -235,6 +138,8 @@ class Table extends Component {
 
 class TaskLog extends Component {
 	taskSessionSummary(taskSessions, taskName) {
+		if (!taskSessions.length) return
+
 		const totalDuration = taskSessions.reduce((total, { startTimestamp, endTimestamp }) => {
 			return total + (endTimestamp - startTimestamp)
 		}, 0)
@@ -242,33 +147,30 @@ class TaskLog extends Component {
 		const totalDayDuration = taskSessions
 			.filter(({ startTimestamp }) => startTimestamp > beginningOfDayTimestamp())
 			.reduce((total, { startTimestamp, endTimestamp }) => {
-     		return total + (endTimestamp - startTimestamp)
+				return total + (endTimestamp - startTimestamp)
 			}, 0)
 
-		return (
-			<div className="task-log-row cf pv2">
-				<div className="task-name fl ph1">{taskName}</div>
-				<div className="day-amount fr ph1">{humanReadableTime(totalDayDuration)}</div>
-				<div className="total-amount fr ph1">{humanReadableTime(totalDuration)}</div>
-			</div>
-		)
+		return [taskName, humanReadableTime(totalDayDuration), humanReadableTime(totalDuration)]
 	}
 
 	render({ allTaskSessions }) {
+		console.log('allTaskSessions', allTaskSessions)
+
 		return (
-			<div>
-				<div className="task-log-headers">
-					<div>Task</div>
-					<div>Today</div>
-					<div>Total</div>
-				</div>
-				{
-					_.map(
-						allTaskSessions,
-						(taskSessions, taskName) => this.taskSessionSummary(taskSessions, taskName)
-					)
-				}
-			</div>
+			<Table
+			className="task-log"
+			columnConfig={[
+				{ label: 'Task', columnClass: 'tl', columnWidthPercentage: .5 },
+				{ label: 'Today', columnClass: 'tl' },
+				{ label: 'Total', columnClass: 'tl' },
+			]}
+			rows={
+				_.map(
+					allTaskSessions,
+					(taskSessions, taskName) => this.taskSessionSummary(taskSessions, taskName)
+				)
+			}
+			/>
 		)
 	}
 }
@@ -276,30 +178,30 @@ class TaskLog extends Component {
 class Toolbar extends Component {
 	constructor() {
 		super()
-  	this.state = {}
+		this.state = {}
 	}
 
 	componentDidMount() {
-		store.registerComponentContext(this)
+		toolbarStore.registerComponentContext(this)
 	}
 
-  render(props, state) {
+	render(props, state) {
 		let playOrPaused = (
 			<button
 				className={cx("ma2", { disabled: !state.currentTask })}
 				onClick={() => {
 					if (state.currentTask) {
-          	store.startTask(state.currentTask)
+						toolbarStore.startTask(state.currentTask)
 					}
 				}}>
 				Play
 			</button>
 		)
 		if (state.timerState === PLAYING) {
-			playOrPaused = <button className="ma2" onClick={() => store.pauseTask()}>Pause</button>
+			playOrPaused = <button className="ma2" onClick={() => toolbarStore.pauseTask()}>Pause</button>
 		}
 
-  	return (
+		return (
 			<div className="pa2 tc">
 				<div
 					className={cx('current-task mv2', state.currentTask ? 'selected' : 'blank')}>
@@ -308,7 +210,7 @@ class Toolbar extends Component {
 				<Timer className="timer mb2" />
 				<div>
 					{playOrPaused}
-					<button className="ma2" onClick={() => store.stopTask()}>Stop</button>
+					<button className="ma2" onClick={() => toolbarStore.stopTask()}>Stop</button>
 				</div>
 				<TaskLog allTaskSessions={state.allTaskSessions} />
 			</div>

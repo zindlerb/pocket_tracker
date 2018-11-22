@@ -2,6 +2,20 @@
 
 }
 
+.table.task-log .header {
+	border-bottom: 1px black solid;
+	margin-bottom: 8px;
+	padding-bottom: 4px;
+}
+
+.table.task-log {
+
+}
+
+.task-column {
+  width: 45%;
+}
+
 .current-task.blank {
 	color: #8a8989;
 	font-style: italic;
