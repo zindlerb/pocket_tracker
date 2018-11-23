@@ -46,6 +46,8 @@ Or notion first diagramming?
 [x] get the version number from the package json
 [x] fix issue with initial timestamp. I should be backsetting it based on the duration - right now it does not account for pauses
 [ ] set up icons from sketch
+    to dynamically set icon:
+    https://electronjs.org/docs/api/tray#traysetimageimage
 [ ] break some code into seperate files
 [ ] truncate text for long names
     https://developer.mozilla.org/en-US/docs/Web/CSS/text-overflow - overflow: ellipsis
