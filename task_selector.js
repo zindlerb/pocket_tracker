@@ -6,13 +6,13 @@ import Mousetrap from 'mousetrap';
 import {StoreAbstractBase} from './shared.js'
 import cx from 'classnames'
 import {loadData} from './services/persistance.js'
+import Fuse from 'fuse.js'
 
 const ADD_NEW_TASK = "<<<~ADD_NEW_TASK~>>>"
 
-const filterTasksOptions = (taskName, taskOptions) => {
-	const filteredOptions = taskOptions.filter((taskOption) => taskOption.includes(taskName))
-
-  return filteredOptions.concat([ADD_NEW_TASK])
+const initFuse = (filteredTaskNames) => {
+	const nameData = filteredTaskNames.map((taskName) => ({ name: taskName }))
+	return new Fuse(nameData, { keys: ['name'] })
 }
 
 class Store extends StoreAbstractBase {
@@ -21,11 +21,18 @@ class Store extends StoreAbstractBase {
 			taskSearch: '',
     	taskNames: [],
       filteredTaskNames: [ADD_NEW_TASK],
-      selectedTaskIndex: 0
+      selectedTaskIndex: 0,
+			fuzzySearch: initFuse([])
 		})
 
-		loadData(({ allTaskSessions }) => {
-			this.setState({ taskNames: Object.keys(allTaskSessions) })
+		loadData((data) => {
+			if (data) {
+				const taskNames = Object.keys(data.allTaskSessions)
+				this.setState({
+					taskNames: taskNames,
+					fuzzySearch: initFuse(taskNames)
+				})
+			}
 		})
 	}
 
@@ -37,6 +44,7 @@ class Store extends StoreAbstractBase {
 		if (selectedOption === ADD_NEW_TASK) {
 			if (!taskNames.includes(taskName)) {
 				this.state.taskNames.push(taskName)
+				this.state.fuzzySearch = initFuse(this.state.taskNames)
 				selectedTaskName = taskName
     	} else {
 				throw `Attempt to add duplicate task name ${taskName}, ${taskNames}`
@@ -55,7 +63,7 @@ class Store extends StoreAbstractBase {
 	updateTaskSearch(newSearchString) {
     this.setState({
       taskSearch: newSearchString,
-      filteredTaskNames: filterTasksOptions(newSearchString, this.state.taskNames),
+      filteredTaskNames: this.state.fuzzySearch.search(newSearchString).map(({ name }) => name).concat([ADD_NEW_TASK]),
       selectedTaskIndex: 0
     })
 	}
@@ -191,7 +199,11 @@ class TaskSelector extends Component {
 
 		window.addEventListener('keyup', (e) => {
 			if (e.keyCode === 13) { // Enter
-				localStore.selectTask(this.state.taskSearch)
+				if (this.state.taskSearch) {
+					localStore.selectTask(this.state.taskSearch)
+				} else {
+					closeWindow()
+				}
 			} else if (e.keyCode === 38) { // Up Key
 				localStore.moveTaskSelectionUp()
 			} else if (e.keyCode === 40) { // Down Key

@@ -38,15 +38,15 @@ Or notion first diagramming?
 [x] get the auto complete loading correctly
 [x] get the menu items working
 [x] remove the glows around button clicks and task selector input
-[ ] grab fuzzy search lib and get improved fuzzy search
+[x] grab fuzzy search lib and get improved fuzzy search
     http://fusejs.io/
-[ ] pressing enter with nothing in the search box should not do anything. it should close.. yes
-[ ] fix issue with initial timestamp. I should be backsetting it based on the duration - right now it does not account for pauses
+[x] pressing enter with nothing in the search box should not do anything. it should close.. yes
+[x] add a menu icon that has an exit, download data button, delete data button (don't really delete just move it over to new data set)
+[x] rename app
+[x] get the version number from the package json
+[x] fix issue with initial timestamp. I should be backsetting it based on the duration - right now it does not account for pauses
 [ ] set up icons from sketch
 [ ] break some code into seperate files
-[ ] add a menu icon that has an exit, download data button, delete data button (don't really delete just move it over to new data set)
-[ ] rename app
-[ ] get the version number from the package json
 [ ] truncate text for long names
     https://developer.mozilla.org/en-US/docs/Web/CSS/text-overflow - overflow: ellipsis
 [ ] scrolling for too many tasks

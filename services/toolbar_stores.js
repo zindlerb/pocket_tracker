@@ -37,10 +37,10 @@ class ToolbarStore extends StoreAbstractBase {
 
 	stopTask() {
 		if (this.state.timerState === STOPPED) return;
-
+		const endTimestamp = Date.now()
 		this.state.allTaskSessions[this.state.currentTask].push({
-			startTimestamp: this.timerStore.state.startTimestamp,
-			endTimestamp: Date.now()
+			startTimestamp: endTimestamp - this.timerStore.state.durationMillis,
+			endTimestamp: endTimestamp
 		})
 
 		this.state.timerState = STOPPED
