@@ -1,4 +1,4 @@
-export class StoreAbstractBase {
+export default class StoreAbstractBase {
 	constructor(initialState) {
 		this.state = initialState
   	this.componentContext = null
@@ -19,9 +19,3 @@ export class StoreAbstractBase {
 		this.componentContext.setState(this.state, onUpdateCallback)
 	}
 }
-
-// TIMER STATES
-export const PLAYING = 'PLAYING'
-export const PAUSED = 'PAUSED'
-export const STOPPED = 'STOPPED'
-export const MINIMIZED = 'MINIMIZED'

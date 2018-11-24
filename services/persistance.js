@@ -1,7 +1,7 @@
 const electron = require('electron');
 const path = require('path');
 const fs = require('fs');
-const appVersion = require('../constants.js').APP_VERSION
+const appVersion = require('./constants.js').APP_VERSION
 
 const FILE_NAME = 'pocketTrackerData'
 const USER_DATA_PATH = (electron.app || electron.remote.app).getPath('userData');

@@ -5,8 +5,8 @@ module.exports = {
 	mode: 'development',
 	devtool: 'cheap-source-map',
   entry: {
-		toolbar: './toolbar.js',
-		taskSelector: './task_selector.js'
+		toolbar: './renderers/toolbar.js',
+		selector: './renderers/selector.js'
 	},
 	output: {
 		path: path.resolve(__dirname, './dist'),

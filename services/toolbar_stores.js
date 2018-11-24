@@ -1,6 +1,9 @@
 import { loadData, saveData, deleteData } from './persistance.js'
-import {StoreAbstractBase, PLAYING, PAUSED, STOPPED, MINIMIZED} from '../shared.js'
+import {timerStates} from './constants.js'
+import StoreAbstractBase from './store_abstract_base.js'
 import { ipcRenderer } from 'electron'
+
+const {PLAYING, PAUSED, STOPPED, MINIMIZED} = timerStates
 
 const getInitialState = () => {
   return {

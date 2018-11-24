@@ -1,12 +1,14 @@
 var BrowserWindow = require('electron').BrowserWindow
 const ipc = require('electron').ipcMain
-var menubar = require('menubar');
+var menubar = require('./services/menubar');
 var globalShortcut = require('electron').globalShortcut
-var constants = require('./constants.js')
+var constants = require('./services/constants.js')
 var mb = menubar({
 	alwaysOnTop: true,
 	width: 300,
-	height: 350
+	height: 350,
+	index: './renderers/toolbar.html',
+	icon: './icons/IconTemplate.png'
 })
 
 var win;
@@ -25,7 +27,7 @@ mb.on('ready', function ready () {
 		frame: false,
     toolbar: false,
 	})
-	win.loadURL(`file://${__dirname}/task_selector.html`)
+	win.loadURL(constants.SELECTOR_RENDERER_URL)
 	win.hide()
 	win.maximize()
 	mb.showWindow()

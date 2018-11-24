@@ -1,12 +1,13 @@
 import _ from 'lodash'
-import './task_selector.css'
 import { h, render, Component } from 'preact';
 import { remote, ipcRenderer } from 'electron'
 import Mousetrap from 'mousetrap';
-import {StoreAbstractBase} from './shared.js'
 import cx from 'classnames'
-import {loadData} from './services/persistance.js'
 import Fuse from 'fuse.js'
+
+import './selector.css'
+import StoreAbstractBase from '../services/store_abstract_base.js'
+import {loadData} from '../services/persistance.js'
 
 const ADD_NEW_TASK = "<<<~ADD_NEW_TASK~>>>"
 
