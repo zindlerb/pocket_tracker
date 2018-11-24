@@ -1,3 +1,6 @@
+// CODE TAKEN FROM: https://github.com/maxogden/menubar
+// Then modified
+
 var path = require('path')
 var events = require('events')
 var fs = require('fs')
