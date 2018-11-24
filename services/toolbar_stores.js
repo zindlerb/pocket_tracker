@@ -1,5 +1,6 @@
 import { loadData, saveData, deleteData } from './persistance.js'
 import {StoreAbstractBase, PLAYING, PAUSED, STOPPED, MINIMIZED} from '../shared.js'
+import { ipcRenderer } from 'electron'
 
 const getInitialState = () => {
   return {
@@ -27,6 +28,7 @@ class ToolbarStore extends StoreAbstractBase {
 
 	pauseTask() {
 		this.setState({ timerState: PAUSED })
+		ipcRenderer.send('pause-icon')
 		this.timerStore.pause()
 	}
 
@@ -37,6 +39,8 @@ class ToolbarStore extends StoreAbstractBase {
 
 	stopTask() {
 		if (this.state.timerState === STOPPED) return;
+		ipcRenderer.send('stop-icon')
+
 		const endTimestamp = Date.now()
 		this.state.allTaskSessions[this.state.currentTask].push({
 			startTimestamp: endTimestamp - this.timerStore.state.durationMillis,
@@ -52,6 +56,7 @@ class ToolbarStore extends StoreAbstractBase {
 
 	resumeTask() {
 		this.timerStore.start(this.state.timerState)
+		ipcRenderer.send('play-icon') // TODO: merge with start task.
 		this.setState({ timerState: PLAYING })
 	}
 
@@ -69,6 +74,7 @@ class ToolbarStore extends StoreAbstractBase {
 			this.state.allTaskSessions[taskName] = []
 		}
 
+		ipcRenderer.send('play-icon')
 		this.triggerRender()
 	}
 }

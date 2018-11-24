@@ -2,6 +2,7 @@ var BrowserWindow = require('electron').BrowserWindow
 const ipc = require('electron').ipcMain
 var menubar = require('menubar');
 var globalShortcut = require('electron').globalShortcut
+var constants = require('./constants.js')
 var mb = menubar({
 	alwaysOnTop: true,
 	width: 300,
@@ -75,4 +76,16 @@ ipc.on('add-task', function (e, taskName) {
 
 ipc.on('exit-app', function (e, taskName) {
 	mb.tray.destroy()
+})
+
+ipc.on('play-icon', function (e, taskName) {
+	mb.tray.setImage(constants.PLAY_ICON)
+})
+
+ipc.on('pause-icon', function (e, taskName) {
+	mb.tray.setImage(constants.PAUSE_ICON)
+})
+
+ipc.on('stop-icon', function (e, taskName) {
+	mb.tray.setImage(constants.STOP_ICON)
 })
