@@ -1,3 +1,6 @@
+alex's family is in town
+
+
 what does slack first diagramming look like?
 Or notion first diagramming?
 
@@ -48,7 +51,7 @@ Or notion first diagramming?
 [x] set up icons from sketch
     to dynamically set icon:
     https://electronjs.org/docs/api/tray#traysetimageimage
-[ ] break some code into seperate files
+[x] break some code into seperate files
 [ ] truncate text for long names
     https://developer.mozilla.org/en-US/docs/Web/CSS/text-overflow - overflow: ellipsis
 [ ] scrolling for too many tasks
