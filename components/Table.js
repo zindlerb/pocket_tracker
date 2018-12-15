@@ -1,8 +1,8 @@
 import { h, Component } from 'preact';
 import cx from 'classnames'
-
-export default class Table extends Component {
-	render({ className, columnConfig, rows }) { // Open Q. Do obj or positional here?
+// Open Q. Do obj or positional here?
+class Table extends Component {
+	render({ className, columnConfig, rows }) {
 		/*
 			column config:
 				columnClass
@@ -61,3 +61,5 @@ export default class Table extends Component {
 		)
 	}
 }
+
+export default Table

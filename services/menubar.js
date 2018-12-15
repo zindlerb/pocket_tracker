@@ -13,6 +13,9 @@ var BrowserWindow = electron.BrowserWindow
 var extend = require('extend')
 var Positioner = require('electron-positioner')
 
+console.log(electron)
+console.log(require.resolve('electron'))
+
 /*
 	TOOD:
 		- read through file. Get full understanding.

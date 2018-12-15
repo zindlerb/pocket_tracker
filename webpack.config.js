@@ -25,6 +25,12 @@ module.exports = {
 					{
 						loader: 'babel-loader',
 						query: {
+							presets: [
+								[
+      						"@babel/preset-env",
+									{"useBuiltIns": "entry"}
+    						]
+							],
 							plugins: [
 								["@babel/plugin-transform-react-jsx", { "pragma":"h" }]
 							]

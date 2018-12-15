@@ -1,6 +1,3 @@
-alex's family is in town
-
-
 what does slack first diagramming look like?
 Or notion first diagramming?
 
@@ -75,3 +72,6 @@ I want to be able to modify my history -
 is it better to have the first one selected and then have it be create new one orrr be dropdown to select
 
 Consider making the day timestamp be a rolling last 24 hrs?
+
+# RANDOM NOTES:
+Need to use electron pre built for some reason
