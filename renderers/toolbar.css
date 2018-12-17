@@ -1,3 +1,26 @@
+.hotkey-info {
+	font-size: 12px;
+	border-top: 1px solid #E6E6E6;
+	color: #909090;
+	position: absolute;
+	bottom: 0px;
+}
+
+.view-container {
+  font-size: 14px;
+}
+
+body {
+  font-family: 'Open Sans', sans-serif;
+}
+
+.fa-play, .fa-pause, .fa-stop {
+	font-size: 13px;
+	padding-top: 1.5px;
+	font-size: 13px;
+	color: #464646;
+}
+
 .clickable {
   cursor: pointer;
 }
@@ -7,10 +30,9 @@
 }
 
 .menu-button {
-	position: absolute;
-	top: 8px;
-	right: 8px;
-	color: #85a3ff;
+
+  font-size: 14px;
+	color: #000000;
 }
 
 .current-task.selected {

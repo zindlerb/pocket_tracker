@@ -1,3 +1,7 @@
+// total
+// view:
+
+
 import _ from 'lodash'
 import { h, render, Component } from 'preact';
 import { ipcRenderer, remote } from 'electron'
@@ -74,11 +78,11 @@ class TaskLog extends Component {
 	render({ allTaskSessions }) {
 		return (
 			<Table
-			className="task-log"
+			className="task-log ph2"
 			columnConfig={[
 				{ label: 'Task', columnClass: 'tl', columnWidthPercentage: .6 },
-				{ label: 'Today', columnClass: 'tl' },
-				{ label: 'Total', columnClass: 'tl' },
+				{ label: 'Today', columnClass: 'tr' },
+				{ label: 'Total', columnClass: 'tr' },
 			]}
 			rows={
 				_.compact(_.map(
@@ -124,36 +128,60 @@ class Toolbar extends Component {
 
 	render(props, state) {
 		let playOrPaused = (
-			<button
-				className={cx("ma2", { disabled: !state.currentTask, clickable: state.currentTask })}
+			<i
+				className="fas fa-play"
 				onClick={() => {
 					if (state.currentTask) {
 						toolbarStore.startTask(state.currentTask)
 					}
 				}}>
-				Play
-			</button>
+			</i>
 		)
 		if (state.timerState === PLAYING) {
-			playOrPaused = <button className="ma2 clickable" onClick={() => toolbarStore.pauseTask()}>Pause</button>
+			playOrPaused = (
+				<i
+					className="fas fa-pause"
+					onClick={() => toolbarStore.pauseTask()}>
+				</i>
+			)
 		}
 
 		if (!state.isMenuOpen) {
 			return (
-				<div className="pa2 tc toolbar-container">
-					<div className="menu-button clickable" onClick={this.openMenu.bind(this)}>
-						Menu
+				<div className="toolbar-container h-100">
+					<div className="pt2 ph2 mb1 flex justify-between items-center">
+						<div
+							className={cx('current-task', state.currentTask ? 'selected' : 'blank')}>
+							{state.currentTask || 'select task'}
+						</div>
+						<div className="dib menu-button clickable" onClick={this.openMenu.bind(this)}>
+							Menu
+						</div>
 					</div>
-					<div
-						className={cx('current-task mv2', state.currentTask ? 'selected' : 'blank')}>
-						{state.currentTask || 'select task'}
+					<div className="flex items-center mb3 ph2">
+						<Timer className="timer" />
+						<div className="flex">
+						<div className="ml3 mr1">
+							{playOrPaused}
+						</div>
+						<i
+							className="fas fa-stop"
+							onClick={() => toolbarStore.stopTask()}>
+						</i>
+						</div>
 					</div>
-					<Timer className="timer mb2" />
-					<div className="mb3">
-						{playOrPaused}
-						<button className="ma2 clickable" onClick={() => toolbarStore.stopTask()}>Stop</button>
+					<div className="view-container mv1 ph2">
+						<div className="dib">View:</div>
+						<div className="view-dropdown relative dib mh2">
+							<span>total</span>
+							<i className="fas fa-angle-down mh1"></i>
+						</div>
 					</div>
 					<TaskLog allTaskSessions={state.allTaskSessions} />
+					<div className="hotkey-info pv1 w-100">
+						<span className="mh2">Select Task: &#8984;+shift+c</span>
+						<span className="mh2">Play/Pause: &#8984;+shift+p</span>
+					</div>
 				</div>
 			)
 		} else {

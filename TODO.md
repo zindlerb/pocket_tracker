@@ -1,3 +1,40 @@
+
+
+
+
+
+Next Design things:
+- add the plus button.
+- make the menu look clickable
+- try offseting menu and task
+- doodle on how to make the task look editable
+- make full pass at centerint the time. it feels too scruntched right now
+
+
+I cannot center the text if I want it to double as a text box
+
+
+
+
+
+
+
+
+
+
+css but then it can be switched into select and move mode...
++ screen snapshots
+
+
+design:
+    - sketch paper
+    - no color layout
+    - fonts
+    - color
+    - repeat
+
+
+
 what does slack first diagramming look like?
 Or notion first diagramming?
 
