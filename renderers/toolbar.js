@@ -173,7 +173,7 @@ class Toolbar extends Component {
 					<div className="flex justify-between items-center ph2 mv1">
 						<div className="view-container">
 							<div className="dib">View:</div>
-							<div className="view-dropdown relative dib mh2">
+							<div className="view-dropdown relative dib mh2 clickable">
 								<span>total</span>
 								<i className="fas fa-angle-down mh1"></i>
 							</div>

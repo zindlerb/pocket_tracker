@@ -7,7 +7,7 @@
 }
 
 .view-container {
-  font-size: 14px;
+  font-size: 12px;
 }
 
 body {
@@ -43,9 +43,13 @@ body {
 
 }
 
+.table {
+	font-size: 14px;
+}
+
 .table.task-log .header {
 	border-bottom: 1px black solid;
-	margin-bottom: 8px;
+	margin-bottom: 6px;
 	padding-bottom: 4px;
 }
 
