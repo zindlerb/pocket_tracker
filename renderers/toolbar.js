@@ -170,11 +170,16 @@ class Toolbar extends Component {
 						</i>
 						</div>
 					</div>
-					<div className="view-container mv1 ph2">
-						<div className="dib">View:</div>
-						<div className="view-dropdown relative dib mh2">
-							<span>total</span>
-							<i className="fas fa-angle-down mh1"></i>
+					<div className="flex justify-between items-center ph2 mv1">
+						<div className="view-container">
+							<div className="dib">View:</div>
+							<div className="view-dropdown relative dib mh2">
+								<span>total</span>
+								<i className="fas fa-angle-down mh1"></i>
+							</div>
+						</div>
+						<div>
+							<i className="fas fa-plus clickable"></i>
 						</div>
 					</div>
 					<TaskLog allTaskSessions={state.allTaskSessions} />

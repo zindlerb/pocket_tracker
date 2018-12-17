@@ -25,6 +25,10 @@ body {
   cursor: pointer;
 }
 
+.fa-plus {
+	font-size: 12px;
+}
+
 .clickable:hover {
   opacity: 0.7;
 }
