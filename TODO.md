@@ -15,6 +15,17 @@ Or notion first diagramming?
 
 
 # TODOS
+[x] force selector open
+[x] get selector looking correct
+[ ] play pause + switching working
+[ ] day view
+[ ] add button
+    [ ] ugly view
+[ ] deploy
+
+
+
+
 [ ] setup css for new layout
     [ ] background color diff for search?
     [ ] lighter color for interactable elements?

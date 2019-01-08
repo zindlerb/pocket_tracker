@@ -21,7 +21,7 @@ class Store extends StoreAbstractBase {
 		super({
 			taskSearch: '',
     	taskNames: [],
-      filteredTaskNames: [ADD_NEW_TASK],
+      filteredTaskNames: [],
       selectedTaskIndex: 0,
 			fuzzySearch: initFuse([])
 		})

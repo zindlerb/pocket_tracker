@@ -43,7 +43,7 @@ mb.on('after-create-window', function () {
 		win.reload()
   })
 
-	globalShortcut.register('Command+Shift+X', () => {
+	globalShortcut.register('Command+Shift+C', () => {
 		win.show() // TODO: add in toggle show
 
 		if (DEBUG.showDropdownDevTools) {
@@ -51,7 +51,7 @@ mb.on('after-create-window', function () {
 		}
   })
 
-	globalShortcut.register('Command+Shift+C', () => {
+	globalShortcut.register('Command+Shift+P', () => {
 		mb.window.webContents.send('toggleTaskState')
   })
 
